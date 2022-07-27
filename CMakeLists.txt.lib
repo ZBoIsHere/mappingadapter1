@@ -1,0 +1,95 @@
+cmake_minimum_required(VERSION 3.0.2)
+project(mappingadapter)
+
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
+set(CMAKE_INCLUDE_CURRENT_DIR_IN_INTERFACE ON)
+
+set(${PROJECT_NAME}_VERSION 0.0.1)
+
+include(GenerateExportHeader)
+
+find_package(catkin REQUIRED COMPONENTS
+        roscpp
+        rosbag
+        std_msgs
+        )
+
+find_package(PCL REQUIRED COMPONENTS
+        common
+        io
+)
+
+include_directories(
+        ${catkin_INCLUDE_DIRS}
+        ${PCL_INCLUDE_DIRS}
+)
+
+add_library(${PROJECT_NAME} SHARED src/mapping_adapter.cpp include/mapping_adapter.hpp)
+
+target_link_libraries(${PROJECT_NAME}
+        ${catkin_LIBRARIES}
+        ${PCL_LIBRARIES}
+        pcl_common
+        pcl_io
+)
+
+generate_export_header(${PROJECT_NAME})
+set_property(TARGET ${PROJECT_NAME} PROPERTY VERSION ${${PROJECT_NAME}_VERSION})
+set_property(TARGET ${PROJECT_NAME} PROPERTY SOVERSION 1)
+set_property(TARGET ${PROJECT_NAME} PROPERTY
+  INTERFACE_${PROJECT_NAME}_MAJOR_VERSION 1)
+set_property(TARGET ${PROJECT_NAME} APPEND PROPERTY
+  COMPATIBLE_INTERFACE_STRING ${PROJECT_NAME}_MAJOR_VERSION
+)
+
+install(TARGETS ${PROJECT_NAME} EXPORT ${PROJECT_NAME}Targets
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
+  RUNTIME DESTINATION bin
+  INCLUDES DESTINATION include
+)
+
+install(
+  FILES
+    include/mapping_adapter.hpp
+    "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}_export.h"
+  DESTINATION
+    include
+  COMPONENT
+    Devel
+)
+
+include(CMakePackageConfigHelpers)
+write_basic_package_version_file(
+  "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/${PROJECT_NAME}ConfigVersion.cmake"
+  VERSION ${${PROJECT_NAME}_VERSION}
+  COMPATIBILITY AnyNewerVersion
+)
+
+export(EXPORT ${PROJECT_NAME}Targets
+  FILE "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/${PROJECT_NAME}Targets.cmake"
+  NAMESPACE ${PROJECT_NAME}::
+)
+configure_file(cmake/${PROJECT_NAME}Config.cmake
+  "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/${PROJECT_NAME}Config.cmake"
+  COPYONLY
+)
+
+set(ConfigPackageLocation lib/cmake/${PROJECT_NAME})
+install(EXPORT ${PROJECT_NAME}Targets
+  FILE
+    ${PROJECT_NAME}Targets.cmake
+  NAMESPACE
+    ${PROJECT_NAME}::
+  DESTINATION
+    ${ConfigPackageLocation}
+)
+install(
+  FILES
+    cmake/${PROJECT_NAME}Config.cmake
+    "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/${PROJECT_NAME}ConfigVersion.cmake"
+  DESTINATION
+    ${ConfigPackageLocation}
+  COMPONENT
+    Devel
+)
