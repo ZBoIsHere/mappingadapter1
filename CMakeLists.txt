@@ -2,20 +2,30 @@ cmake_minimum_required(VERSION 3.0.2)
 project(mappingadapter)
 
 find_package(catkin REQUIRED COMPONENTS
-  roscpp
-  rosbag
-  std_msgs
+    roscpp
+    rosbag
+    std_msgs
 )
 
- add_library(${PROJECT_NAME}
-   src/mapping_adapter.cpp
- )
-target_include_directories(${PROJECT_NAME} PUBLIC
-        ${catkin_LIBRARIES}
+find_package(PCL REQUIRED COMPONENTs
+    common
+    io
 )
-install(TARGETS ${PROJECT_NAME}
-        LIBRARY DESTINATION lib
-        ARCHIVE DESTINATION lib
-        RUNTIME DESTINATION bin
-        PUBLIC_HEADER DESTINATION include
-        )
+
+include_directories(
+    ${catkin_INCLUDE_DIRS}
+    ${PCL_INCLUDE_DIRS}
+        ${PROJECT_SOURCE_DIR}/include
+)
+
+add_library(${PROJECT_NAME} SHARED
+    src/mapping_adapter.cpp
+ )
+
+
+target_include_directories(${PROJECT_NAME} PUBLIC
+    ${catkin_LIBRARIES}
+    ${PCL_LIBRARIES}
+    pcl_common
+    pcl_io
+)
